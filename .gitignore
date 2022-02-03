@@ -127,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+data
+transphone/output
+transphone/runs
+.idea
