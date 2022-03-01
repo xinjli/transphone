@@ -131,4 +131,5 @@ dmypy.json
 data
 transphone/output
 transphone/runs
+transphone/pretrained
 .idea
