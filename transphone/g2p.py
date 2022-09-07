@@ -1,46 +1,33 @@
 from transphone.model.checkpoint_utils import torch_load
 from transphone.model.transformer import TransformerG2P
+from transphone.model.ensemble import ensemble
 from transphone.bin.download_model import download_model
-from transphone.model.utils import resolve_model_name, get_all_models
 from transphone.config import TransphoneConfig
 from transphone.data.vocab import Vocab
+from phonepiece.tree import read_tree
+from phonepiece.inventory import read_inventory
 import torch
-import torch.nn as nn
-from pathlib import Path
-from argparse import Namespace
 
 
-def read_g2p(inference_config_or_name='g2p', alt_model_path=None):
+def read_g2p(model_name='latest', alt_model_path=None):
 
     if alt_model_path:
-        if not alt_model_path.exists():
-            download_model(inference_config_or_name, alt_model_path)
-
-    # download specified model automatically if no model exists
-    if len(get_all_models()) == 0:
-        download_model('latest', alt_model_path)
-
-    # create default config if input is the model's name
-    if isinstance(inference_config_or_name, str):
-        model_name = resolve_model_name(inference_config_or_name, alt_model_path)
-        inference_config = Namespace(model=model_name, device_id=-1, lang='ipa', approximate=False, prior=None)
+        # check whether a customized path is used or not
+        model_path = alt_model_path
     else:
-        assert isinstance(inference_config_or_name, Namespace)
-        inference_config = inference_config_or_name
+        model_path = TransphoneConfig.data_path / 'model' / model_name
 
-    if alt_model_path:
-        model_path = alt_model_path / inference_config.model
-    else:
-        model_path = Path(__file__).parent / 'pretrained' / inference_config.model
+    # if not exists, we try to download the model
+    if not model_path.exists():
+        download_model(model_name)
 
-    if inference_config.model == 'latest' and not model_path.exists():
-        download_model(inference_config, alt_model_path)
+    if not model_path.exists():
+        raise ValueError(f"could not download or read {model_name} inventory")
 
-    assert model_path.exists(), f"{inference_config.model} is not a valid model"
-
-    model = G2P(model_path, inference_config)
+    model = G2P(model_path, {})
 
     return model
+
 
 class G2P:
 
@@ -50,6 +37,25 @@ class G2P:
         self.grapheme_vocab = Vocab.read(model_path / 'grapheme.vocab')
         self.phoneme_vocab = Vocab.read(model_path / 'phoneme.vocab')
         self.inference_config = inference_config
+
+        # setup available languages
+        self.supervised_langs = []
+        for word in self.grapheme_vocab.words[2:]:
+            if len(word) == 5 and word[0] == '<' and word[-1] == '>':
+                self.supervised_langs.append(word[1:-1])
+
+
+        # cache to find proper supervised language
+        self.lang_map = {}
+
+        # inventory
+        self.lang2inv = {}
+
+        # tree to estimate language's similarity
+        self.tree = read_tree()
+        self.tree.setup_target_langs(self.supervised_langs)
+        self.supervised_langs = set(self.supervised_langs)
+
 
         SRC_VOCAB_SIZE = len(self.grapheme_vocab)+1
         TGT_VOCAB_SIZE = len(self.phoneme_vocab)+1
@@ -66,17 +72,67 @@ class G2P:
 
         torch_load(self.model, model_path / "model.pt")
 
-    def inference(self, word, lang_id='eng'):
 
-        lang_tag = '<'+lang_id+'>'
+    def get_target_langs(self, lang_id, num_lang=10, force_approximate=False):
 
-        graphemes = [lang_tag]+[w.lower() for w in list(word)]
+        if lang_id in self.lang_map:
+            target_langs = self.lang_map[lang_id]
+        else:
 
-        grapheme_ids = [self.grapheme_vocab.atoi(grapheme) for grapheme in graphemes]
+            if force_approximate or lang_id not in self.supervised_langs:
+                target_langs = self.tree.get_nearest_langs(lang_id, num_lang)
+                print("lang ", lang_id, " is not available directly, use ", target_langs, " instead")
+                self.lang_map[lang_id] = target_langs
+            else:
+                self.lang_map[lang_id] = [lang_id]
+                target_langs = [lang_id]
 
-        x = torch.LongTensor(grapheme_ids).unsqueeze(0).cuda()
-        phone_ids = self.model.inference(x)
+        return target_langs
 
-        phones = [self.phoneme_vocab.itoa(phone) for phone in phone_ids]
+    def inference(self, word, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+
+        target_langs = self.get_target_langs(lang_id, num_lang, force_approximate)
+
+        phones_lst = []
+
+        for target_lang_id in target_langs:
+            lang_tag = '<' + target_lang_id + '>'
+
+            graphemes = [lang_tag]+[w.lower() for w in list(word)]
+
+            grapheme_ids = []
+            for grapheme in graphemes:
+                if grapheme not in self.grapheme_vocab:
+                    print("WARNING: not found grapheme ", grapheme, " in vocab")
+                    continue
+                grapheme_ids.append(self.grapheme_vocab.atoi(grapheme))
+
+            x = torch.LongTensor(grapheme_ids).unsqueeze(0).cuda()
+            phone_ids = self.model.inference(x)
+
+            phones = [self.phoneme_vocab.itoa(phone) for phone in phone_ids]
+
+            # ignore empty
+            if len(phones) == 0:
+                continue
+
+            # if it is a mapped language, we need to map the inference_phone to the correct language inventory
+            if lang_id not in self.lang2inv:
+                inv = read_inventory(lang_id)
+                self.lang2inv[lang_id] = inv
+
+            inv = self.lang2inv[lang_id]
+            phones = inv.remap(phones)
+
+            if debug:
+                print(target_lang_id, ' ', phones)
+
+            phones_lst.append(phones)
+
+
+        if len(phones_lst) == 0:
+            phones = []
+        else:
+            phones = ensemble(phones_lst)
 
         return phones

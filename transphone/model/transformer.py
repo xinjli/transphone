@@ -57,6 +57,7 @@ class TokenEmbedding(nn.Module):
     def forward(self, tokens: Tensor):
         return self.embedding(tokens.long()) * math.sqrt(self.emb_size)
 
+
 # Seq2Seq Network
 class TransformerG2P(nn.Module):
     def __init__(self,

@@ -133,3 +133,5 @@ transphone/output
 transphone/runs
 transphone/pretrained
 .idea
+scripts/
+notes/

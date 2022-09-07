@@ -11,7 +11,7 @@ def test():
 
     print(e)
 
-def rover(pred_lst):
+def ensemble(pred_lst):
 
     assert len(pred_lst) >= 1
 
@@ -232,4 +232,4 @@ class Lattice:
     def compute(self):
         cs_items = [cs.compute() for cs in self.cs_lst]
 
-        return " ".join([cs_item for cs_item in cs_items if cs_item != "<blk>"])
+        return [cs_item for cs_item in cs_items if cs_item != "<blk>" and not cs_item.isspace()]

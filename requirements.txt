@@ -1,0 +1,10 @@
+scipy
+numpy
+panphon
+torch
+editdistance
+requests
+tqdm
+pyyaml
+phonepiece
+epitran
