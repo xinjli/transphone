@@ -15,12 +15,7 @@ Our approach:
 
 ## Install
 
-Transphone is available from pip
-
-```bash
-pip install transphone
-```
-You can also clone this repository and install
+You can clone this repository and install
 
 ```bash
 python setup.py install
