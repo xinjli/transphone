@@ -40,7 +40,7 @@ def torch_load(model, path):
         model (torch.nn.Module): Torch model.
 
     """
-    model_state_dict = torch.load(str(path))
+    model_state_dict = torch.load(str(path), map_location=torch.device('cpu'))
 
     new_state_dict = OrderedDict()
     for k, v in model_state_dict.items():

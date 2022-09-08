@@ -13,7 +13,7 @@ def download_model(model_name=None, alt_model_path=None):
     if alt_model_path:
         model_dir = alt_model_path
     else:
-        model_dir = (Path(__file__).parent.parent.parent) / 'data' / 'model'
+        model_dir = (Path(__file__).parent.parent) / 'pretrained' / 'model'
         model_dir.mkdir(parents=True, exist_ok=True)
 
     if not (model_dir / model_name).exists():
