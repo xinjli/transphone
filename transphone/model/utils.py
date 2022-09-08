@@ -1,4 +1,5 @@
 from pathlib import Path
+from transphone.config import TransphoneConfig
 import shutil
 
 
@@ -11,7 +12,8 @@ def get_all_models(alt_model_path=None):
     if alt_model_path:
         model_dir = alt_model_path
     else:
-        model_dir = Path(__file__).parent / 'pretrained'
+        model_dir = TransphoneConfig.data_path / 'model'
+
     models = list(sorted(model_dir.glob('*'), reverse=True))
 
     #assert len(models) > 0, "No models are available, you can maually download a model with download command or just run inference to download the latest one automatically"
@@ -29,7 +31,7 @@ def get_model_path(model_name, alt_model_path=None):
     if alt_model_path:
         model_dir = alt_model_path
     else:
-        model_dir = Path(__file__).parent / 'pretrained'
+        model_dir = TransphoneConfig.data_path / 'model'
 
     resolved_model_name = resolve_model_name(model_name)
 
@@ -51,7 +53,7 @@ def copy_model(src_model_name, tgt_model_name):
     src_model_path = get_model_path(src_model_name)
 
     # verify the target path is empty
-    model_dir = Path(__file__).parent / 'pretrained'
+    model_dir = Path(__file__).parent / 'pretrained' / 'model'
     tgt_model_path = model_dir / tgt_model_name
 
     assert not tgt_model_path.exists(), \
@@ -80,13 +82,13 @@ def resolve_model_name(model_name='latest', alt_model_path=None):
 
     models = get_all_models(alt_model_path)
 
-    # get the latest model in local
-    if model_name == 'latest':
-        return models[0].name
-
     # match model name
     for model in models:
         if model.name == model_name:
             return model_name
+
+    # get the latest model in local
+    if model_name == 'latest':
+        return models[0].name
 
     return "none"

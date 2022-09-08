@@ -15,6 +15,12 @@ Our approach:
 
 ## Install
 
+transphone is available from pip
+
+```bash
+pip install transphone
+```
+
 You can clone this repository and install
 
 ```bash
@@ -22,6 +28,20 @@ python setup.py install
 ```
 
 ## Usage
+
+### Command line
+
+A command line tool is available
+
+```bash
+# compute pronunciation for every word in input file
+$ python -m transphone.run --lang eng --input sample.txt 
+h ɛ l o ʊ
+w ə l d
+t ɹ æ n s f ə ʊ n
+```
+
+### python interface
 
 A simple python usage is as follows:
 
