@@ -7,6 +7,7 @@ from transphone.data.vocab import Vocab
 from phonepiece.tree import read_tree
 from phonepiece.inventory import read_inventory
 import torch
+import unidecode
 
 
 def read_g2p(model_name='latest', alt_model_path=None):
@@ -77,7 +78,7 @@ class G2P:
         torch_load(self.model, model_path / "model.pt")
 
 
-    def get_target_langs(self, lang_id, num_lang=10, force_approximate=False):
+    def get_target_langs(self, lang_id, num_lang=10, debug=False, force_approximate=False):
 
         if lang_id in self.lang_map:
             target_langs = self.lang_map[lang_id]
@@ -85,7 +86,8 @@ class G2P:
 
             if force_approximate or lang_id not in self.supervised_langs:
                 target_langs = self.tree.get_nearest_langs(lang_id, num_lang)
-                print("lang ", lang_id, " is not available directly, use ", target_langs, " instead")
+                if debug:
+                    print("lang ", lang_id, " is not available directly, use ", target_langs, " instead")
                 self.lang_map[lang_id] = target_langs
             else:
                 self.lang_map[lang_id] = [lang_id]
@@ -95,7 +97,7 @@ class G2P:
 
     def inference(self, word, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
 
-        target_langs = self.get_target_langs(lang_id, num_lang, force_approximate)
+        target_langs = self.get_target_langs(lang_id, num_lang, debug, force_approximate)
 
         phones_lst = []
 
@@ -107,7 +109,13 @@ class G2P:
             grapheme_ids = []
             for grapheme in graphemes:
                 if grapheme not in self.grapheme_vocab:
-                    print("WARNING: not found grapheme ", grapheme, " in vocab")
+                    romans = list(unidecode.unidecode(grapheme))
+
+                    if debug:
+                        print("WARNING: not found grapheme ", grapheme, " in vocab. use ", romans, " instead")
+
+                    for roman in romans:
+                        grapheme_ids.append(self.grapheme_vocab.atoi(roman))
                     continue
                 grapheme_ids.append(self.grapheme_vocab.atoi(grapheme))
 

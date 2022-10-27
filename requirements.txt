@@ -8,3 +8,4 @@ tqdm
 pyyaml
 phonepiece
 epitran
+unidecode
