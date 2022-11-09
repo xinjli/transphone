@@ -39,6 +39,12 @@ $ python -m transphone.run --lang eng --input sample.txt
 h ɛ l o ʊ
 w ə l d
 t ɹ æ n s f ə ʊ n
+
+# by specifying combine flag, you can get word + pronunciation per line
+$ python -m transphone.run --lang eng --input sample.txt --combine=True
+hello h ɛ l o ʊ
+world w ə l d
+transphone t ɹ æ n s f ə ʊ n
 ```
 
 ### python interface

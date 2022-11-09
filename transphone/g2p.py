@@ -95,7 +95,7 @@ class G2P:
 
         return target_langs
 
-    def inference(self, word, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+    def inference_word(self, word, target_langs, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
 
         target_langs = self.get_target_langs(lang_id, num_lang, debug, force_approximate)
 
@@ -109,13 +109,18 @@ class G2P:
             grapheme_ids = []
             for grapheme in graphemes:
                 if grapheme not in self.grapheme_vocab:
+
+                    # romanize chars not available in training languages
                     romans = list(unidecode.unidecode(grapheme))
 
                     if debug:
                         print("WARNING: not found grapheme ", grapheme, " in vocab. use ", romans, " instead")
 
                     for roman in romans:
-                        grapheme_ids.append(self.grapheme_vocab.atoi(roman))
+
+                        # discard special chars such as $
+                        if roman in self.grapheme_vocab:
+                            grapheme_ids.append(self.grapheme_vocab.atoi(roman))
                     continue
                 grapheme_ids.append(self.grapheme_vocab.atoi(grapheme))
 
@@ -149,3 +154,17 @@ class G2P:
             phones = ensemble(phones_lst)
 
         return phones
+
+    def inference(self, text, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+
+        target_langs = self.get_target_langs(lang_id, num_lang, debug, force_approximate)
+
+        phones_lst = []
+
+        words = text.split()
+
+        for word in words:
+            phones = self.inference_word(word, target_langs, lang_id, num_lang, debug, force_approximate)
+            phones_lst.extend(phones)
+
+        return phones_lst
