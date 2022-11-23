@@ -1,6 +1,6 @@
 # transphone
 
-`transphone` is a grapheme-to-phoneme conversion toolkit. It provides approximation G2P model for 8000 languages.
+`transphone` is a grapheme-to-phoneme conversion toolkit. It provides phoneme tokenizers as well as approximation G2P model for 8000 languages.
 
 This repo contains our code and pretrained models roughly following our paper accepted at `Findings of ACL 2022`
 
@@ -29,7 +29,42 @@ python setup.py install
 
 ## Usage
 
-### Command line
+### Tokenizer interface
+
+The tokenizer has a similar interface as HuggingFace tokenizer, which converts a string into each languages' phonemes
+
+The tokenizer will first lookup lexicon dictionary for pronunciation, it will fall back to the G2P engine if lexicon is not available.  Currently, eng, cmn, jpn have lexicon available inside. Other languages will use G2P instead.
+
+```python
+In [1]: from transphone import read_tokenizer                                                                                                  
+
+In [2]: eng = read_tokenizer('eng')                                                                                                            
+
+In [3]: lst = eng.tokenize('hello world')                                                                                                      
+
+In [4]: lst                                                                                                                                    
+Out[4]: ['h', 'ʌ', 'l', 'o', 'w', 'w', 'ɹ̩', 'l', 'd']
+
+In [5]: ids = eng.convert_tokens_to_ids(lst)                                                                                                   
+
+In [6]: ids                                                                                                                                    
+Out[6]: [7, 36, 11, 14, 21, 21, 33, 11, 3]
+
+In [7]: eng.convert_ids_to_tokens(ids)                                                                                                         
+Out[7]: ['h', 'ʌ', 'l', 'o', 'w', 'w', 'ɹ̩', 'l', 'd']
+
+In [8]: jpn = read_tokenizer('jpn')                                                                                                            
+
+In [9]: jpn.tokenize('こんにちは世界')                                                                                                         
+Out[9]: ['k', 'o', 'N', 'n', 'i', 'ch', 'i', 'w', 'a', 's', 'e', 'k', 'a', 'i']
+
+In [10]: cmn = read_tokenizer('cmn')                                                                                                           
+
+In [11]: cmn.tokenize('你好世界')                                                                                                              
+Out[11]: ['n', 'i', 'x', 'a', 'o', 'ʂ', 'ɻ̩', 't͡ɕ', 'i', 'e']
+```
+
+### G2P Command line
 
 A command line tool is available
 
@@ -47,7 +82,7 @@ world w ə l d
 transphone t ɹ æ n s f ə ʊ n
 ```
 
-### python interface
+### python G2P interface
 
 A simple python usage is as follows:
 

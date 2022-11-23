@@ -95,7 +95,7 @@ class G2P:
 
         return target_langs
 
-    def inference_word(self, word, target_langs, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+    def inference_word(self, word, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
 
         target_langs = self.get_target_langs(lang_id, num_lang, debug, force_approximate)
 
@@ -164,7 +164,7 @@ class G2P:
         words = text.split()
 
         for word in words:
-            phones = self.inference_word(word, target_langs, lang_id, num_lang, debug, force_approximate)
+            phones = self.inference_word(word, lang_id, num_lang, debug, force_approximate)
             phones_lst.extend(phones)
 
         return phones_lst

@@ -9,3 +9,5 @@ pyyaml
 phonepiece
 epitran
 unidecode
+mecab-python3
+cmudict
