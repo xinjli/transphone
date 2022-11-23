@@ -1,3 +1,4 @@
+from phonepiece.iso import normalize_lang_id
 from transphone.model.checkpoint_utils import torch_load
 from transphone.model.transformer import TransformerG2P
 from transphone.model.ensemble import ensemble
@@ -156,8 +157,7 @@ class G2P:
         return phones
 
     def inference(self, text, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
-
-        target_langs = self.get_target_langs(lang_id, num_lang, debug, force_approximate)
+        lang_id = normalize_lang_id(lang_id)
 
         phones_lst = []
 
