@@ -1,6 +1,7 @@
 from transphone.utils import import_with_auto_install
 from transphone.lang.base_tokenizer import BaseTokenizer
 from phonepiece.pinyin import PinyinConverter
+from transphone.lang.cmn.normalizer import CMNNormalizer
 
 class CMNTokenizer(BaseTokenizer):
 
@@ -14,10 +15,13 @@ class CMNTokenizer(BaseTokenizer):
 
         self.pinyin = pypinyin.lazy_pinyin
         self.converter = PinyinConverter()
+        self.normalizer = CMNNormalizer()
 
     def tokenize(self, text, use_g2p=True, verbose=False):
 
-        words = list(self.jieba.cut(text, use_paddle=True))
+        text = self.normalizer(text)
+
+        words = list(self.jieba.cut(text, use_paddle=False))
         ipa_lst = []
 
         for word in words:

@@ -3,7 +3,7 @@ from transphone.lang.jpn.kana2phoneme import Kana2Phoneme
 from transphone.g2p import read_g2p
 from phonepiece.inventory import read_inventory
 from transphone.lang.base_tokenizer import BaseTokenizer
-
+from transphone.lang.jpn.normalizer import normalize_neologd
 
 class JPNTokenizer(BaseTokenizer):
 
@@ -19,6 +19,8 @@ class JPNTokenizer(BaseTokenizer):
         self.kana2phoneme = Kana2Phoneme()
 
     def tokenize(self, text, use_g2p=True, verbose=False):
+
+        text = normalize_neologd(text)
 
         raw_words = self.tagger.parse(text).split('\n')
 
