@@ -17,7 +17,7 @@ class CMNTokenizer(BaseTokenizer):
         self.converter = PinyinConverter()
         self.normalizer = CMNNormalizer()
 
-    def tokenize(self, text, use_g2p=True, verbose=False):
+    def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
         text = self.normalizer(text)
 
@@ -28,4 +28,6 @@ class CMNTokenizer(BaseTokenizer):
             pinyins = self.pinyin(word)
             for pinyin in pinyins:
                 ipa_lst.extend(self.converter.convert(pinyin))
+            if use_space:
+                ipa_lst.append('<SPACE>')
         return ipa_lst

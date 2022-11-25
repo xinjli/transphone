@@ -18,7 +18,7 @@ class JPNTokenizer(BaseTokenizer):
         self.tagger = MeCab.Tagger()
         self.kana2phoneme = Kana2Phoneme()
 
-    def tokenize(self, text, use_g2p=True, verbose=False):
+    def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
         text = normalize_neologd(text)
 
@@ -52,5 +52,8 @@ class JPNTokenizer(BaseTokenizer):
                         print(f"g2p {raw} ->  {remapped_phonemes}")
                     self.cache[raw] = remapped_phonemes
                     result.extend(remapped_phonemes)
+
+            if use_space:
+                result.append('<SPACE>')
 
         return result

@@ -14,7 +14,7 @@ class ENGTokenizer(BaseTokenizer):
         self.converter = ArpaConverter()
         self.punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
 
-    def tokenize(self, text, use_g2p=True, verbose=False):
+    def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
         text = text.translate(str.maketrans('', '', self.punctuation)).lower()
         ipa_lst = []
@@ -31,5 +31,7 @@ class ENGTokenizer(BaseTokenizer):
                         print(f"g2p {word} ->  {remapped_phonemes}")
                     self.cache[word] = remapped_phonemes
                     ipa_lst.extend(remapped_phonemes)
+                if use_space:
+                    ipa_lst.append('<SPACE>')
 
         return ipa_lst

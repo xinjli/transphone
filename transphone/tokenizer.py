@@ -23,7 +23,7 @@ def read_tokenizer(lang_id, g2p_model='latest'):
 
 class G2PTokenizer(BaseTokenizer):
 
-    def tokenize(self, text, use_g2p=True, verbose=False):
+    def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
         text = text.translate(str.maketrans('', '', self.punctuation)).lower()
         result = []
@@ -38,5 +38,7 @@ class G2PTokenizer(BaseTokenizer):
                     print(f"g2p {word} ->  {remapped_phonemes}")
                 self.cache[word] = remapped_phonemes
                 result.extend(remapped_phonemes)
+            if use_space:
+                result.append('<SPACE>')
 
         return result

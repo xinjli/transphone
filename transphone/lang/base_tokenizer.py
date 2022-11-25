@@ -14,6 +14,8 @@ class BaseTokenizer:
         raise NotImplementedError
 
     def convert_tokens_to_ids(self, lst):
+        lst = list(filter(lambda s: s!='<SPACE>', lst))
+
         return self.inventory.phoneme.atoi(lst)
 
     def convert_ids_to_tokens(self, lst):
