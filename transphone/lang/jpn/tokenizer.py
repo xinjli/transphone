@@ -34,6 +34,9 @@ class JPNTokenizer(BaseTokenizer):
 
             res = self.kana2phoneme.convert(kana)
 
+            if res == ['*'] and self.kana2phoneme.validate(raw):
+                res = self.kana2phoneme.convert(raw)
+
             if verbose:
                 print(kana, res)
 

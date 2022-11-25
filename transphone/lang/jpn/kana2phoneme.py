@@ -1,4 +1,4 @@
-
+from .conv_table import FULL_KANA
 
 _kana2phonemes = {
     'ア': 'a',
@@ -297,6 +297,12 @@ class Kana2Phoneme:
         self._regex1 = re.compile(u"(%s)" % u"|".join(map(re.escape, self._dict1.keys())))
         self._regex2 = re.compile(u"(%s)" % u"|".join(map(re.escape, self._dict2.keys())))
 
+    def validate(self, text):
+        for word in text.strip():
+            if word not in FULL_KANA:
+                return False
+        return True
+
     def convert(self, origin_text):
 
         if isinstance(origin_text, list):
@@ -313,7 +319,8 @@ class Kana2Phoneme:
         phonemes = []
         for temp_phoneme in temp_phonemes:
             if temp_phoneme == 'ː':
-                phonemes[-1] = phonemes[-1]+'ː'
+                if len(phonemes) > 0:
+                    phonemes[-1] = phonemes[-1]+'ː'
                 continue
 
             phonemes.append(temp_phoneme)
