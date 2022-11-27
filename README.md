@@ -33,7 +33,7 @@ python setup.py install
 
 The tokenizer has a similar interface as HuggingFace tokenizer, which converts a string into each languages' phonemes
 
-The tokenizer will first lookup lexicon dictionary for pronunciation, it will fall back to the G2P engine if lexicon is not available.  Currently, eng, cmn, jpn have lexicon available inside. Other languages will use G2P instead.
+The tokenizer will first lookup lexicon dictionary for pronunciation, it will fall back to the G2P engine if lexicon is not available.  Currently, more than 200 languages have lexicon available inside. Other languages will use G2P instead.
 
 ```python
 In [1]: from transphone import read_tokenizer                                                                                                  
@@ -62,6 +62,12 @@ In [10]: cmn = read_tokenizer('cmn')
 
 In [11]: cmn.tokenize('你好世界')                                                                                                              
 Out[11]: ['n', 'i', 'x', 'a', 'o', 'ʂ', 'ɻ̩', 't͡ɕ', 'i', 'e']
+
+In [12]: deu = read_tokenizer('deu')                                    
+
+In [13]: deu.tokenize('Hallo Welt')                                     
+Out[13]: ['h', 'a', 'l', 'o', 'v', 'e', 'l', 't']
+
 ```
 
 ### G2P Command line

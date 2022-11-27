@@ -4,7 +4,7 @@ requirements=[r.strip() for r in open("requirements.txt").readlines()]
 
 setup(
    name='transphone',
-   version='1.1.6',
+   version='1.2.0',
    description='a multilingual g2p/p2g model',
    author='Xinjian Li',
    author_email='xinjianl@cs.cmu.edu',
