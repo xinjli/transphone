@@ -9,7 +9,7 @@ class JPNTokenizer(BaseTokenizer):
 
     def __init__(self, lang_id, g2p_model='latest'):
 
-        super(JPNTokenizer, self).__init__(lang_id, g2p_model)
+        super().__init__(lang_id, g2p_model)
 
         # import mecab and its dict
         MeCab = import_with_auto_install('MeCab', 'mecab-python3')
@@ -17,6 +17,21 @@ class JPNTokenizer(BaseTokenizer):
 
         self.tagger = MeCab.Tagger()
         self.kana2phoneme = Kana2Phoneme()
+
+    def tokenize_words(self, text:str):
+        text = normalize_neologd(text)
+
+        raw_words = self.tagger.parse(text).split('\n')
+
+        result = []
+
+        # exclude the last EOS word
+        for word in raw_words[:-2]:
+            raw = word.split('\t')[0]
+            result.append(raw)
+
+        return result
+
 
     def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 

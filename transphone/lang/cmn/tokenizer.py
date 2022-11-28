@@ -17,6 +17,13 @@ class CMNTokenizer(BaseTokenizer):
         self.converter = PinyinConverter()
         self.normalizer = CMNNormalizer()
 
+    def tokenize_words(self, text):
+
+        text = self.normalizer(text)
+        words = list(self.jieba.cut(text, use_paddle=False))
+        return words
+
+
     def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
         text = self.normalizer(text)

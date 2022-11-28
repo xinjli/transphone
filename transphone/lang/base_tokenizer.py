@@ -13,6 +13,12 @@ class BaseTokenizer:
     def tokenize(self, text: str):
         raise NotImplementedError
 
+    def tokenize_words(self, text:str):
+        text = text.translate(str.maketrans('', '', self.punctuation)).lower()
+        result = []
+
+        return text.split()
+
     def convert_tokens_to_ids(self, lst):
         lst = list(filter(lambda s: s!='<SPACE>', lst))
 
