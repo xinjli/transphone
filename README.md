@@ -1,5 +1,7 @@
 # transphone
 
+![CI Test](https://github.com/xinjli/transphone/actions/workflows/python.yml/badge.svg)
+
 `transphone` is a grapheme-to-phoneme conversion toolkit. It provides phoneme tokenizers as well as approximation G2P model for 8000 languages.
 
 This repo contains our code and pretrained models roughly following our paper accepted at `Findings of ACL 2022`

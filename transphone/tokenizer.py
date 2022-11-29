@@ -32,7 +32,14 @@ class G2PTokenizer(BaseTokenizer):
 
     def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
-        text = text.translate(str.maketrans('', '', self.punctuation)).lower()
+        norm_text = text.translate(str.maketrans('', '', self.punctuation)).lower()
+        log = f"normalization: {text} -> {norm_text}"
+        self.logger.info(log)
+        if verbose:
+            print(log)
+
+        text = norm_text
+
         result = []
 
         for word in text.split():
@@ -42,13 +49,18 @@ class G2PTokenizer(BaseTokenizer):
                 phonemes = self.lexicon[word]
                 result.extend(phonemes)
                 self.cache[word] = phonemes
+                log = f"lexicon {word} -> {phonemes}"
+                self.logger.info(log)
                 if verbose:
-                    print(f"lexicon {word} -> {phonemes}")
+                    print(log)
             else:
                 phonemes = self.g2p.inference(word, self.lang_id)
                 remapped_phonemes = self.inventory.remap(phonemes)
+
+                log = f"g2p {word} ->  {remapped_phonemes}"
+                self.logger.info(log)
                 if verbose:
-                    print(f"g2p {word} ->  {remapped_phonemes}")
+                    print(log)
                 self.cache[word] = remapped_phonemes
                 result.extend(remapped_phonemes)
             if use_space:

@@ -26,13 +26,26 @@ class CMNTokenizer(BaseTokenizer):
 
     def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
-        text = self.normalizer(text)
+        norm_text = self.normalizer(text)
+
+        log = f"normalization: {text} -> {norm_text}"
+        self.logger.info(log)
+        if verbose:
+            print(log)
+
+        text = norm_text
 
         words = list(self.jieba.cut(text, use_paddle=False))
+
         ipa_lst = []
 
         for word in words:
             pinyins = self.pinyin(word)
+
+            self.logger.info(f"pinyin: {word} -> {pinyins}")
+            if verbose:
+                print(f"pinyin: {word} -> {pinyins}")
+
             for pinyin in pinyins:
                 ipa_lst.extend(self.converter.convert(pinyin))
             if use_space:

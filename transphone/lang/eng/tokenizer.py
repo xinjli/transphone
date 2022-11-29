@@ -1,6 +1,7 @@
 from transphone.utils import import_with_auto_install
 from transphone.lang.base_tokenizer import BaseTokenizer
 from phonepiece.arpa import ArpaConverter
+from transphone.lang.eng.normalizer import ENGNormalizer
 
 class ENGTokenizer(BaseTokenizer):
 
@@ -12,23 +13,46 @@ class ENGTokenizer(BaseTokenizer):
         cmudict_module = import_with_auto_install('cmudict', 'cmudict')
         self.cmudict = cmudict_module.dict()
         self.converter = ArpaConverter()
-        self.punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+        self.normalizer = ENGNormalizer()
 
     def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
-        text = text.translate(str.maketrans('', '', self.punctuation)).lower()
+        norm_text = self.normalizer(text)
+
+        log = f"normalization: {text} -> {norm_text}"
+        self.logger.info(log)
+        if verbose:
+            print(log)
+
         ipa_lst = []
+        text = norm_text
 
         for word in text.split():
             if len(word) >= 1:
-                if word in self.cmudict:
+                if word in self.cache:
+                    ipas = self.cache[word]
+                    ipa_lst.extend(ipas)
+
+                elif word in self.cmudict:
                     arpa = self.cmudict[word][0]
-                    ipa_lst.extend(self.converter.convert(arpa))
+                    ipas = self.converter.convert(arpa)
+                    ipa_lst.extend(ipas)
+
+                    log = f"CMUdict: {word} -> {arpa} -> {ipas}"
+                    self.logger.info(f"CMUdict: {word} -> {arpa} -> {ipas}")
+                    if verbose:
+                        print(log)
+
+                    self.cache[word] = ipas
+
                 elif use_g2p:
                     phonemes = self.g2p.inference(word)
                     remapped_phonemes = self.inventory.remap(phonemes)
+
+                    log = f"g2p {word} ->  {remapped_phonemes}"
+                    self.logger.info(log)
                     if verbose:
-                        print(f"g2p {word} ->  {remapped_phonemes}")
+                        print(log)
                     self.cache[word] = remapped_phonemes
                     ipa_lst.extend(remapped_phonemes)
                 if use_space:

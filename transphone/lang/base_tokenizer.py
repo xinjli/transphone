@@ -1,5 +1,6 @@
 from phonepiece.inventory import read_inventory
 from transphone.g2p import read_g2p
+from transphone.config import TransphoneConfig
 
 class BaseTokenizer:
 
@@ -9,6 +10,7 @@ class BaseTokenizer:
         self.g2p = read_g2p(g2p_model)
         self.cache = {}
         self.punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+        self.logger = TransphoneConfig.logger
 
     def tokenize(self, text: str):
         raise NotImplementedError
