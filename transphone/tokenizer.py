@@ -5,7 +5,6 @@ from transphone.lang.eng.tokenizer import ENGTokenizer
 from transphone.lang.cmn.tokenizer import CMNTokenizer
 from transphone.lang.jpn.tokenizer import JPNTokenizer
 
-
 def read_tokenizer(lang_id, g2p_model='latest'):
 
     lang_id = normalize_lang_id(lang_id)

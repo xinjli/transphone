@@ -9,6 +9,7 @@ from phonepiece.tree import read_tree
 from phonepiece.inventory import read_inventory
 import torch
 import unidecode
+from itertools import groupby
 
 
 def read_g2p(model_name='latest', alt_model_path=None):
@@ -165,6 +166,7 @@ class G2P:
 
         for word in words:
             phones = self.inference_word(word, lang_id, num_lang, debug, force_approximate)
+            phones = [x[0] for x in groupby(phones)]
             phones_lst.extend(phones)
 
         return phones_lst
