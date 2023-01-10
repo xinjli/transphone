@@ -5,6 +5,7 @@ from transphone.model.ensemble import ensemble
 from transphone.bin.download_model import download_model
 from transphone.config import TransphoneConfig
 from transphone.data.vocab import Vocab
+from transphone.utils import Singleton
 from phonepiece.tree import read_tree
 from phonepiece.inventory import read_inventory
 import torch
@@ -12,7 +13,11 @@ import unidecode
 from itertools import groupby
 
 
-def read_g2p(model_name='latest', alt_model_path=None):
+def read_g2p(model_name='latest', device=None, alt_model_path=None):
+
+    if device is not None:
+        assert device in ['cpu', 'cuda']
+        TransphoneConfig.device = device
 
     if alt_model_path:
         # check whether a customized path is used or not
@@ -32,7 +37,7 @@ def read_g2p(model_name='latest', alt_model_path=None):
     return model
 
 
-class G2P:
+class G2P(metaclass=Singleton):
 
     def __init__(self, model_path, inference_config):
 

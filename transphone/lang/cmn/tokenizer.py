@@ -5,9 +5,9 @@ from transphone.lang.cmn.normalizer import CMNNormalizer
 
 class CMNTokenizer(BaseTokenizer):
 
-    def __init__(self, lang_id='cmn', g2p_model='latest'):
+    def __init__(self, lang_id='cmn', g2p_model='latest', device=None):
 
-        super().__init__(lang_id, g2p_model)
+        super().__init__(lang_id, g2p_model, device)
 
         # import jieba and pypinyin for segmentation
         self.jieba = import_with_auto_install('jieba', 'jieba')

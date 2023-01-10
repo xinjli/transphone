@@ -4,8 +4,9 @@ import torch.nn as nn
 from torch.nn import Transformer
 import math
 from transphone.data.utils import pad_sos_eos
+from transphone.config import TransphoneConfig
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = TransphoneConfig.device
 
 UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 0, 1, 1
 

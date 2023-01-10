@@ -4,10 +4,15 @@ from transphone.config import TransphoneConfig
 
 class BaseTokenizer:
 
-    def __init__(self, lang_id, g2p_model='latest'):
+    def __init__(self, lang_id, g2p_model='latest', device=None):
         self.lang_id = lang_id
         self.inventory = read_inventory(lang_id)
-        self.g2p = read_g2p(g2p_model)
+
+        if g2p_model is None:
+            self.g2p = None
+        else:
+            self.g2p = read_g2p(g2p_model, device)
+
         self.cache = {}
         self.punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
         self.logger = TransphoneConfig.logger

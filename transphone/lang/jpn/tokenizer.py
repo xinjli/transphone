@@ -7,9 +7,9 @@ from transphone.lang.jpn.normalizer import normalize_neologd
 
 class JPNTokenizer(BaseTokenizer):
 
-    def __init__(self, lang_id, g2p_model='latest'):
+    def __init__(self, lang_id, g2p_model='latest', device=None):
 
-        super().__init__(lang_id, g2p_model)
+        super().__init__(lang_id, g2p_model, device)
 
         # import mecab and its dict
         MeCab = import_with_auto_install('MeCab', 'mecab-python3')

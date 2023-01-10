@@ -5,9 +5,9 @@ from transphone.lang.eng.normalizer import ENGNormalizer
 
 class ENGTokenizer(BaseTokenizer):
 
-    def __init__(self, lang_id='eng', g2p_model='latest'):
+    def __init__(self, lang_id='eng', g2p_model='latest', device=None):
 
-        super().__init__(lang_id, g2p_model)
+        super().__init__(lang_id, g2p_model, device)
 
         # import jieba and pypinyin for segmentation
         cmudict_module = import_with_auto_install('cmudict', 'cmudict')

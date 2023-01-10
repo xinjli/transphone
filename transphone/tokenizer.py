@@ -4,65 +4,22 @@ from transphone.lang.base_tokenizer import BaseTokenizer
 from transphone.lang.eng.tokenizer import ENGTokenizer
 from transphone.lang.cmn.tokenizer import CMNTokenizer
 from transphone.lang.jpn.tokenizer import JPNTokenizer
+from transphone.lang.g2p_tokenizer import G2PTokenizer
+from transphone.lang.epitran_tokenizer import read_epitran_tokenzier
 
-def read_tokenizer(lang_id, g2p_model='latest'):
+def read_tokenizer(lang_id, g2p_model='latest', device=None):
 
     lang_id = normalize_lang_id(lang_id)
 
     if lang_id == 'eng':
-        tokenizer = ENGTokenizer(lang_id, g2p_model)
+        tokenizer = ENGTokenizer(lang_id, g2p_model, device)
     elif lang_id == 'cmn':
-        tokenizer = CMNTokenizer(lang_id, g2p_model)
+        tokenizer = CMNTokenizer(lang_id, g2p_model, device)
     elif lang_id == 'jpn':
-        tokenizer = JPNTokenizer(lang_id, g2p_model)
+        tokenizer = JPNTokenizer(lang_id, g2p_model, device)
+    elif lang_id == 'spa':
+        tokenizer = read_epitran_tokenzier('spa-Latn')
     else:
-        tokenizer = G2PTokenizer(lang_id, g2p_model)
+        tokenizer = G2PTokenizer(lang_id, g2p_model, device)
 
     return tokenizer
-
-
-class G2PTokenizer(BaseTokenizer):
-
-    def __init__(self, lang_id, g2p_model='latest'):
-        super().__init__(lang_id, g2p_model)
-
-        self.lexicon = read_lexicon(lang_id)
-
-
-    def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
-
-        norm_text = text.translate(str.maketrans('', '', self.punctuation)).lower()
-        log = f"normalization: {text} -> {norm_text}"
-        self.logger.info(log)
-        if verbose:
-            print(log)
-
-        text = norm_text
-
-        result = []
-
-        for word in text.split():
-            if word in self.cache:
-                result.extend(self.cache[word])
-            elif word in self.lexicon:
-                phonemes = self.lexicon[word]
-                result.extend(phonemes)
-                self.cache[word] = phonemes
-                log = f"lexicon {word} -> {phonemes}"
-                self.logger.info(log)
-                if verbose:
-                    print(log)
-            else:
-                phonemes = self.g2p.inference(word, self.lang_id)
-                remapped_phonemes = self.inventory.remap(phonemes)
-
-                log = f"g2p {word} ->  {remapped_phonemes}"
-                self.logger.info(log)
-                if verbose:
-                    print(log)
-                self.cache[word] = remapped_phonemes
-                result.extend(remapped_phonemes)
-            if use_space:
-                result.append('<SPACE>')
-
-        return result
