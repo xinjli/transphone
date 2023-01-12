@@ -46,8 +46,6 @@ class G2P(metaclass=Singleton):
         self.phoneme_vocab = Vocab.read(model_path / 'phoneme.vocab')
         self.inference_config = inference_config
 
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
         # setup available languages
         self.supervised_langs = []
         for word in self.grapheme_vocab.words[2:]:
@@ -79,7 +77,7 @@ class G2P(metaclass=Singleton):
 
 
         self.model = TransformerG2P(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS, EMB_SIZE,
-                            NHEAD, SRC_VOCAB_SIZE, TGT_VOCAB_SIZE, FFN_HID_DIM).to(self.device)
+                            NHEAD, SRC_VOCAB_SIZE, TGT_VOCAB_SIZE, FFN_HID_DIM).to(TransphoneConfig.device)
 
 
         torch_load(self.model, model_path / "model.pt")
@@ -131,7 +129,7 @@ class G2P(metaclass=Singleton):
                     continue
                 grapheme_ids.append(self.grapheme_vocab.atoi(grapheme))
 
-            x = torch.LongTensor(grapheme_ids).unsqueeze(0).to(self.device)
+            x = torch.LongTensor(grapheme_ids).unsqueeze(0).to(TransphoneConfig.device)
 
             phone_ids = self.model.inference(x)
 
