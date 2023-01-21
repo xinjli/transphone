@@ -11,7 +11,7 @@ class G2PTokenizer(BaseTokenizer):
         self.lexicon = read_lexicon(lang_id)
 
 
-    def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
+    def tokenize(self, text, use_g2p=True, use_space=False):
 
         norm_text = text.translate(str.maketrans('', '', self.punctuation)).lower()
         log = f"normalization: {text} -> {norm_text}"
