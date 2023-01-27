@@ -1,6 +1,6 @@
 import unittest
 from transphone.tokenizer import read_tokenizer
-from transphone.lang.epitran_tokenizer import read_epitran_tokenizer
+
 
 class TestTokenizer(unittest.TestCase):
 
@@ -11,42 +11,44 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(eng.tokenize_words('hello world!!  '), ['hello', 'world'])
         self.assertEqual(eng.tokenize('hello world'), ['h', 'ʌ', 'l', 'o', 'w', 'w', 'ɹ̩', 'l', 'd'])
 
-    def test_spa_epitran_tokenizer(self):
+    def test_spa_tokenizer(self):
 
-        spa = read_epitran_tokenizer('spa-Latn')
+        spa = read_tokenizer('spa')
         self.assertEqual(spa.tokenize('hola hola'), ['o', 'l', 'a', 'o', 'l', 'a'])
         self.assertEqual(spa.tokenize('español'),  ['e', 's', 'p', 'a', 'ɲ', 'o', 'l'])
 
-        spa = read_epitran_tokenizer('spa-Latn', use_lexicon=False)
+        spa = read_tokenizer('spa', use_lexicon=False)
         self.assertEqual(spa.tokenize('hola hola'), ['o', 'l', 'a', 'o', 'l', 'a'])
         self.assertEqual(spa.tokenize('español'),  ['e', 's', 'p', 'a', 'ɲ', 'o', 'l'])
 
-    def test_fra_epitran_tokenizer(self):
-        fra = read_epitran_tokenizer('fra-Latn')
+    def test_fra_tokenizer(self):
+
+        fra = read_tokenizer('fra')
         self.assertEqual(fra.tokenize('français'), ['f', 'ʁ', 'ɑ̃', 's', 'ɛ'])
 
-        fra = read_epitran_tokenizer('fra-Latn', use_lexicon=False)
+        fra = read_tokenizer('fra', use_lexicon=False)
         self.assertEqual(fra.tokenize('français'), ['f', 'ʁ', 'ɑ̃', 's', 'ɛ'])
 
-    def test_deu_epitran_tokenizer(self):
-        deu = read_epitran_tokenizer('deu-Latn')
+    def test_deu_tokenizer(self):
+
+        deu = read_tokenizer('deu')
         self.assertEqual(deu.tokenize('Deutsche'), ['d', 'o', 'i', 't͡ʃ', 'ə'])
 
-        deu = read_epitran_tokenizer('deu-Latn', use_lexicon=False)
+        deu = read_tokenizer('deu', use_lexicon=False)
         self.assertEqual(deu.tokenize('Deutsche'),['d', 'o', 'i', 't͡ʃ', 'ə'])
 
-    def test_ita_epitran_tokenizer(self):
-        ita = read_epitran_tokenizer('ita-Latn')
+    def test_ita_tokenizer(self):
+        ita = read_tokenizer('ita')
         self.assertEqual(ita.tokenize('Italia'), ['i', 't', 'a', 'l', 'j', 'a'])
 
         # g2p is slightly different here
-        ita = read_epitran_tokenizer('ita-Latn', use_lexicon=False)
+        ita = read_tokenizer('ita', use_lexicon=False)
         self.assertEqual(ita.tokenize('Italia'), ['i', 't', 'a', 'l', 'i', 'a'])
 
-    def test_tur_epitran_tokenizer(self):
+    def test_tur_tokenizer(self):
 
-        tur = read_epitran_tokenizer('tur-Latn', use_lexicon=False)
+        tur = read_tokenizer('tur', use_lexicon=False)
         self.assertEqual(tur.tokenize('Türkçe'), ['t', 'y', 'ɾ', 'k', 't͡ʃ', 'e'])
 
-        tur = read_epitran_tokenizer('tur-Latn')
+        tur = read_tokenizer('tur')
         self.assertEqual(tur.tokenize('Türkçe'), ['t', 'y', 'ɾ', 'k', 't͡ʃ', 'e'])

@@ -13,10 +13,12 @@ import re
 from transphone.lang.base_tokenizer import BaseTokenizer
 from epitran.ppprocessor import PrePostProcessor
 from phonepiece.ipa import read_ipa
+import epitran
 
 logger = logging.getLogger('epitran')
 
-def read_epitran_tokenizer(lang_id_or_epi_id, use_lexicon=True):
+
+def read_raw_epitran_tokenizer(lang_id_or_epi_id, use_lexicon=True):
 
     if '-' in lang_id_or_epi_id:
         lang_id, writing_system = lang_id_or_epi_id.split('-', 1)
@@ -29,10 +31,26 @@ def read_epitran_tokenizer(lang_id_or_epi_id, use_lexicon=True):
     else:
         lexicon = {}
 
-    return EpitranTokenizer(lang_id, writing_system, lexicon)
+    return RawEpitranTokenizer(lang_id, writing_system, lexicon)
 
 
-class EpitranTokenizer(BaseTokenizer):
+def read_customized_epitran_tokenizer(lang_id_or_epi_id, use_lexicon=True):
+
+    if '-' in lang_id_or_epi_id:
+        lang_id, writing_system = lang_id_or_epi_id.split('-', 1)
+    else:
+        lang_id = lang_id_or_epi_id
+        writing_system = 'Latn'
+
+    if use_lexicon:
+        lexicon = read_lexicon(lang_id)
+    else:
+        lexicon = {}
+
+    return CustomizedEpitranTokenizer(lang_id, writing_system, lexicon)
+
+
+class CustomizedEpitranTokenizer(BaseTokenizer):
 
     def __init__(self, lang_id, writing_system=None, lexicon=None):
         super().__init__(lang_id, None)
@@ -127,6 +145,68 @@ class EpitranTokenizer(BaseTokenizer):
                 word_ipa_lst = self.match_word(norm_word, verbose)
 
                 log = f"rule raw: {word} -> norm: {norm_word} -> {word_ipa_lst}"
+                self.logger.info(log)
+                if verbose:
+                    print(log)
+
+                #word_ipa_lst = self.ipa.tokenize(self.postprocessor.process(''.join(word_ipa_lst)))
+
+                self.cache[word] = word_ipa_lst
+                ipa_lst.extend(self.cache[word])
+
+        return ipa_lst
+
+
+class RawEpitranTokenizer(BaseTokenizer):
+
+    def __init__(self, lang_id, writing_system='Latin', lexicon=None):
+        super().__init__(lang_id, None)
+
+        #self.lexicon = read_lexicon(lang_id)
+
+        """Constructor"""
+        self.lang_id = lang_id
+        self.writing_system = writing_system
+
+        if writing_system:
+            lang_id = lang_id + '-' + writing_system
+
+        if not lexicon:
+            lexicon = {}
+
+        self.lexicon = lexicon
+
+        self.g2p = epitran.Epitran(lang_id)
+        self.inv = read_inventory(self.lang_id)
+        self.ipa = read_ipa()
+
+        self.cache = defaultdict(list)
+
+
+    def tokenize(self, text: str, verbose: bool=False):
+        text = text.lower()
+
+        ipa_lst = []
+
+        for word in text.split():
+
+            if word in self.cache:
+                ipa_lst.extend(self.cache[word])
+
+            elif word in self.lexicon:
+                phonemes = self.lexicon[word]
+                ipa_lst.extend(phonemes)
+                self.cache[word] = phonemes
+                log = f"lexicon {word} -> {phonemes}"
+                self.logger.info(log)
+                if verbose:
+                    print(log)
+            else:
+
+                word_ipa_lst = self.g2p.trans_list(word)
+                word_ipa_lst = self.inv.remap(word_ipa_lst, broad=True)
+
+                log = f"rule raw: {word} -> remap {word_ipa_lst}"
                 self.logger.info(log)
                 if verbose:
                     print(log)
