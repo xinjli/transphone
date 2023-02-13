@@ -160,6 +160,70 @@ class G2P(metaclass=Singleton):
 
         return phones
 
+    def inference_word_batch(self, word, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+
+        target_langs = self.get_target_langs(lang_id, num_lang, debug, force_approximate)
+
+        phones_lst = []
+
+        grapheme_input = []
+
+        for target_lang_id in target_langs:
+            lang_tag = '<' + target_lang_id + '>'
+
+            graphemes = [lang_tag]+[w.lower() for w in list(word)]
+
+            grapheme_ids = []
+            for grapheme in graphemes:
+                if grapheme not in self.grapheme_vocab:
+
+                    # romanize chars not available in training languages
+                    romans = list(unidecode.unidecode(grapheme))
+
+                    if debug:
+                        print("WARNING: not found grapheme ", grapheme, " in vocab. use ", romans, " instead")
+
+                    for roman in romans:
+
+                        # discard special chars such as $
+                        if roman in self.grapheme_vocab:
+                            grapheme_ids.append(self.grapheme_vocab.atoi(roman))
+                    continue
+                grapheme_ids.append(self.grapheme_vocab.atoi(grapheme))
+
+            grapheme_input.append(grapheme_ids)
+
+        x = torch.LongTensor(grapheme_input).to(TransphoneConfig.device)
+
+        phone_output = self.model.inference_batch(x)
+
+        for target_lang_id, phone_ids in zip(target_langs, phone_output):
+            phones = [self.phoneme_vocab.itoa(phone) for phone in phone_ids]
+
+            # ignore empty
+            if len(phones) == 0:
+                continue
+
+            # if it is a mapped language, we need to map the inference_phone to the correct language inventory
+            if lang_id not in self.lang2inv:
+                inv = read_inventory(lang_id)
+                self.lang2inv[lang_id] = inv
+
+            inv = self.lang2inv[lang_id]
+            phones = inv.remap(phones)
+
+            if debug:
+                print(target_lang_id, ' ', phones)
+
+            phones_lst.append(phones)
+
+        if len(phones_lst) == 0:
+            phones = []
+        else:
+            phones = ensemble(phones_lst)
+
+        return phones
+
     def inference(self, text, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
         lang_id = normalize_lang_id(lang_id)
 
@@ -169,6 +233,20 @@ class G2P(metaclass=Singleton):
 
         for word in words:
             phones = self.inference_word(word, lang_id, num_lang, debug, force_approximate)
+            phones = [x[0] for x in groupby(phones)]
+            phones_lst.extend(phones)
+
+        return phones_lst
+
+    def inference_batch(self, text, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+        lang_id = normalize_lang_id(lang_id)
+
+        phones_lst = []
+
+        words = text.split()
+
+        for word in words:
+            phones = self.inference_word_batch(word, lang_id, num_lang, debug, force_approximate)
             phones = [x[0] for x in groupby(phones)]
             phones_lst.extend(phones)
 

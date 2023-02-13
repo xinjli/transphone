@@ -153,10 +153,55 @@ class TransformerG2P(nn.Module):
             if next_word == EOS_IDX:
                 break
 
-
         out = ys.squeeze(1).tolist()[1:]
 
         if out[-1] == 1:
             out = out[:-1]
 
         return out
+
+    def inference_batch(self, x):
+
+        self.eval()
+
+        # (T,B)
+        src = x.transpose(0, 1)
+
+        num_tokens = src.shape[0]
+        batch_size = src.shape[1]
+
+        src_mask = (torch.zeros(num_tokens, num_tokens)).type(torch.bool).to(TransphoneConfig.device)
+        max_len = num_tokens + 5
+
+        memory = self.encode(src, src_mask)
+        ys = x.new_ones(1, batch_size).fill_(BOS_IDX).type(torch.long)
+
+        is_done = [False] * batch_size
+
+        for i in range(max_len-1):
+            memory = memory.to(TransphoneConfig.device)
+            tgt_mask = (generate_square_subsequent_mask(ys.size(0))
+                        .type(torch.bool)).to(TransphoneConfig.device)
+            out = self.decode(ys, memory, tgt_mask)
+            out = out.transpose(0, 1)
+            prob = self.generator(out[:, -1])
+
+            _, next_words = torch.max(prob, dim=1)
+
+            for j in range(batch_size):
+                if next_words[j].item() == EOS_IDX:
+                    is_done[j] = True
+
+                if is_done[j]:
+                    next_words[j] = EOS_IDX
+
+            ys = torch.cat([ys, next_words.unsqueeze(0)], dim=0)
+
+            if all(is_done):
+                break
+
+        outs = []
+        for y in ys.transpose(0,1).tolist():
+            outs.append([i for i in y if i >= 2])
+
+        return outs

@@ -35,10 +35,10 @@ class G2PTokenizer(BaseTokenizer):
                 if verbose:
                     print(log)
             else:
-                phonemes = self.g2p.inference(word, self.lang_id)
+                phonemes = self.g2p.inference_batch(word, self.lang_id)
                 remapped_phonemes = self.inventory.remap(phonemes)
 
-                log = f"g2p {word} ->  {remapped_phonemes}"
+                log = f"g2p batch mode: {word} ->  {remapped_phonemes}"
                 self.logger.info(log)
                 if verbose:
                     print(log)
