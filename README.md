@@ -33,9 +33,15 @@ python setup.py install
 
 ### Tokenizer interface
 
-The tokenizer has a similar interface as HuggingFace tokenizer, which converts a string into each languages' phonemes
+The tokenizer converts a string into each languages' phonemes
 
-The tokenizer will first lookup lexicon dictionary for pronunciation, it will fall back to the G2P engine if lexicon is not available.  Currently, more than 200 languages have lexicon available inside. Other languages will use G2P instead.
+It will use the following strategy to decide pronunciation
+
+- it will first lookup lexicon dictionary for pronunciation (from Wikitionary)
+- try identifying rule-based transducer from [Epitran](https://github.com/dmort27/epitran) if supported.
+- fall back to the G2P engine if both previous options are not available.  
+
+Currently, more than 200 languages have lexicon available inside, about 100 languages have epitran supported. Other languages will use G2P instead.
 
 ```python
 In [1]: from transphone import read_tokenizer                                                                                                  

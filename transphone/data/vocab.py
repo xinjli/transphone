@@ -19,7 +19,7 @@ class Vocab:
         vocab.words = []
         vocab.map = dict()
 
-        for i, line in enumerate(open(Path(file_path))):
+        for i, line in enumerate(open(Path(file_path), encoding='utf-8')):
             word = line.strip()
             vocab.words.append(word)
             vocab.map[word] = i

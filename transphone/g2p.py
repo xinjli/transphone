@@ -83,7 +83,7 @@ class G2P(metaclass=Singleton):
         torch_load(self.model, model_path / "model.pt")
 
 
-    def get_target_langs(self, lang_id, num_lang=10, debug=False, force_approximate=False):
+    def get_target_langs(self, lang_id, num_lang=10, verbose=False, force_approximate=False):
 
         if lang_id in self.lang_map:
             target_langs = self.lang_map[lang_id]
@@ -91,7 +91,7 @@ class G2P(metaclass=Singleton):
 
             if force_approximate or lang_id not in self.supervised_langs:
                 target_langs = self.tree.get_nearest_langs(lang_id, num_lang)
-                if debug:
+                if verbose:
                     print("lang ", lang_id, " is not available directly, use ", target_langs, " instead")
                 self.lang_map[lang_id] = target_langs
             else:
@@ -100,9 +100,9 @@ class G2P(metaclass=Singleton):
 
         return target_langs
 
-    def inference_word(self, word, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+    def inference_word(self, word, lang_id='eng', num_lang=10, verbose=False, force_approximate=False):
 
-        target_langs = self.get_target_langs(lang_id, num_lang, debug, force_approximate)
+        target_langs = self.get_target_langs(lang_id, num_lang, verbose, force_approximate)
 
         phones_lst = []
 
@@ -118,7 +118,7 @@ class G2P(metaclass=Singleton):
                     # romanize chars not available in training languages
                     romans = list(unidecode.unidecode(grapheme))
 
-                    if debug:
+                    if verbose:
                         print("WARNING: not found grapheme ", grapheme, " in vocab. use ", romans, " instead")
 
                     for roman in romans:
@@ -147,7 +147,7 @@ class G2P(metaclass=Singleton):
             inv = self.lang2inv[lang_id]
             phones = inv.remap(phones)
 
-            if debug:
+            if verbose:
                 print(target_lang_id, ' ', phones)
 
             phones_lst.append(phones)
@@ -160,9 +160,9 @@ class G2P(metaclass=Singleton):
 
         return phones
 
-    def inference_word_batch(self, word, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+    def inference_word_batch(self, word, lang_id='eng', num_lang=10, verbose=False, force_approximate=False):
 
-        target_langs = self.get_target_langs(lang_id, num_lang, debug, force_approximate)
+        target_langs = self.get_target_langs(lang_id, num_lang, verbose, force_approximate)
 
         phones_lst = []
 
@@ -180,7 +180,7 @@ class G2P(metaclass=Singleton):
                     # romanize chars not available in training languages
                     romans = list(unidecode.unidecode(grapheme))
 
-                    if debug:
+                    if verbose:
                         print("WARNING: not found grapheme ", grapheme, " in vocab. use ", romans, " instead")
 
                     for roman in romans:
@@ -212,7 +212,7 @@ class G2P(metaclass=Singleton):
             inv = self.lang2inv[lang_id]
             phones = inv.remap(phones)
 
-            if debug:
+            if verbose:
                 print(target_lang_id, ' ', phones)
 
             phones_lst.append(phones)
@@ -224,7 +224,7 @@ class G2P(metaclass=Singleton):
 
         return phones
 
-    def inference(self, text, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+    def inference(self, text, lang_id='eng', num_lang=10, verbose=False, force_approximate=False):
         lang_id = normalize_lang_id(lang_id)
 
         phones_lst = []
@@ -232,13 +232,13 @@ class G2P(metaclass=Singleton):
         words = text.split()
 
         for word in words:
-            phones = self.inference_word(word, lang_id, num_lang, debug, force_approximate)
+            phones = self.inference_word(word, lang_id, num_lang, verbose, force_approximate)
             phones = [x[0] for x in groupby(phones)]
             phones_lst.extend(phones)
 
         return phones_lst
 
-    def inference_batch(self, text, lang_id='eng', num_lang=10, debug=False, force_approximate=False):
+    def inference_batch(self, text, lang_id='eng', num_lang=10, verbose=False, force_approximate=False):
         lang_id = normalize_lang_id(lang_id)
 
         phones_lst = []
@@ -246,7 +246,7 @@ class G2P(metaclass=Singleton):
         words = text.split()
 
         for word in words:
-            phones = self.inference_word_batch(word, lang_id, num_lang, debug, force_approximate)
+            phones = self.inference_word_batch(word, lang_id, num_lang, verbose, force_approximate)
             phones = [x[0] for x in groupby(phones)]
             phones_lst.extend(phones)
 
