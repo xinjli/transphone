@@ -44,7 +44,7 @@ class JPNTokenizer(BaseTokenizer):
         # exclude the last EOS word
         for word in raw_words[:-2]:
 
-            kana = word.split(',')[-1]
+            kana = word.split('\t')[1]
             raw = word.split('\t')[0]
 
             res = self.kana2phoneme.convert(kana)
