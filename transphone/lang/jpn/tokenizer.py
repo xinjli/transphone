@@ -2,8 +2,9 @@ from transphone.utils import import_with_auto_install
 from transphone.lang.jpn.kana2phoneme import Kana2Phoneme
 from transphone.g2p import read_g2p
 from phonepiece.inventory import read_inventory
+from transphone.lang.jpn import jaconv
 from transphone.lang.base_tokenizer import BaseTokenizer
-from transphone.lang.jpn.normalizer import normalize_neologd
+from transphone.lang.jpn.normalizer import normalize_neologd, parse_jpn_number
 
 class JPNTokenizer(BaseTokenizer):
 
@@ -46,6 +47,10 @@ class JPNTokenizer(BaseTokenizer):
 
             kana = word.split('\t')[1]
             raw = word.split('\t')[0]
+
+            if str.isdigit(raw):
+                hankaku_num = jaconv.z2h(kana)
+                kana = jaconv.hira2kata(parse_jpn_number(hankaku_num))
 
             res = self.kana2phoneme.convert(kana)
 
