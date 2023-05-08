@@ -104,6 +104,43 @@ def parse_small_jpn_number(num):
     return read_str
 
 
+def parse_jpn_alphabet(text):
+
+    katakana_dict = {
+        'A': 'エー',
+        'B': 'ビー',
+        'C': 'シー',
+        'D': 'ディー',
+        'E': 'イー',
+        'F': 'エフ',
+        'G': 'ジー',
+        'H': 'エイチ',
+        'I': 'アイ',
+        'J': 'ジェー',
+        'K': 'ケー',
+        'L': 'エル',
+        'M': 'エム',
+        'N': 'エヌ',
+        'O': 'オー',
+        'P': 'ピー',
+        'Q': 'キュー',
+        'R': 'アール',
+        'S': 'エス',
+        'T': 'ティー',
+        'U': 'ユー',
+        'V': 'ブイ',
+        'W': 'ダブリュー',
+        'X': 'エックス',
+        'Y': 'ワイ',
+        'Z': 'ゼット',
+    }
+
+    katakana_text = ''
+    for char in text.upper():
+        if char in katakana_dict:
+            katakana_text += katakana_dict[char]
+    return katakana_text
+
 def parse_jpn_number(num):
 
     num_size = len(str(num))

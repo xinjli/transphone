@@ -1,0 +1,6 @@
+model: g2p
+num_encoder: 4
+num_decoder: 4
+embed_size: 512
+hidden_size: 512
+num_head: 8

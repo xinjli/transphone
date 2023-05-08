@@ -15,6 +15,25 @@ import shutil
 import torch
 from torch.serialization import default_restore_location
 from pathlib import Path
+from transphone.config import TransphoneConfig
+
+
+def find_topk_models(exp_name, topk=1):
+
+    if isinstance(exp_name, str):
+        exp_dir = TransphoneConfig.data_path / 'model' / exp_name
+    else:
+        assert isinstance(exp_name, Path)
+        exp_dir = exp_name
+
+    model_lst = []
+    for model_path in exp_dir.glob('model_*.pt'):
+        perf = model_path.stem.split('_')[1]
+        model_lst.append((float(perf), model_path))
+
+    model_lst.sort()
+    topk_models = [model[1] for model in model_lst[:topk]]
+    return topk_models
 
 
 def torch_save(model, path):

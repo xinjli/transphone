@@ -14,6 +14,14 @@ class BaseTokenizer:
             self.g2p = read_g2p(g2p_model, device)
 
         self.cache = {}
+
+        if self.g2p is not None and self.g2p.cache_path is not None:
+            lang_cache_path = self.g2p.cache_path / f"{lang_id}.txt"
+            if lang_cache_path.exists():
+                for line in open(lang_cache_path, 'r'):
+                    fields = line.strip().split()
+                    self.cache[fields[0]] = fields[1:]
+
         self.punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
         self.logger = TransphoneConfig.logger
 
@@ -22,7 +30,6 @@ class BaseTokenizer:
 
     def tokenize_words(self, text:str):
         text = text.translate(str.maketrans('', '', self.punctuation)).lower()
-        result = []
 
         return text.split()
 

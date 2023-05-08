@@ -1,75 +1,22 @@
 from pathlib import Path
 from transphone.config import TransphoneConfig
 import shutil
+import yaml
 
 
-def get_all_models(alt_model_path=None):
-    """
-    get all local models
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
-    :return:
-    """
-    if alt_model_path:
-        model_dir = alt_model_path
-    else:
-        model_dir = TransphoneConfig.data_path / 'model'
+def read_model_config(exp):
+    yaml_file = TransphoneConfig.data_path / 'exp' / f'{exp}.yml'
+    # Open the YAML file and load its contents into a Python dictionary
+    with open(yaml_file, "r") as f:
+        model_config = yaml.safe_load(f)
 
-    models = list(sorted(model_dir.glob('*'), reverse=True))
-
-    #assert len(models) > 0, "No models are available, you can maually download a model with download command or just run inference to download the latest one automatically"
-
-    return models
-
-
-def get_model_path(model_name, alt_model_path=None):
-    """
-    get model path by name, verify its a valid path
-
-    :param model_name: str
-    :return: model path
-    """
-    if alt_model_path:
-        model_dir = alt_model_path
-    else:
-        model_dir = TransphoneConfig.data_path / 'model'
-
-    resolved_model_name = resolve_model_name(model_name)
-
-    assert resolved_model_name != "none", model_name+" is not a valid model name. please check by list_model"
-
-    return model_dir / resolved_model_name
-
-
-def copy_model(src_model_name, tgt_model_name):
-    """
-    copy a model to a new model
-
-    :param src_model_name:
-    :param tgt_model_name:
-    :return:
-    """
-
-    # verify the source path is not empty
-    src_model_path = get_model_path(src_model_name)
-
-    # verify the target path is empty
-    model_dir = Path(__file__).parent / 'pretrained' / 'model'
-    tgt_model_path = model_dir / tgt_model_name
-
-    assert not tgt_model_path.exists(), \
-        "provided model name "+tgt_model_name+" has already exist. Consider another name or delete the existing one"
-
-    shutil.copytree(str(src_model_path), str(tgt_model_path))
-
-
-def delete_model(model_name):
-
-    model_path = get_model_path(model_name)
-
-    answer = input(f"you will delete {model_path}? [Y|N]")
-    if answer.lower() in ['y', 'yes', 'true']:
-        print("deleting ", model_path)
-        shutil.rmtree(str(model_path))
+    return dotdict(model_config)
 
 
 def resolve_model_name(model_name='latest', alt_model_path=None):
@@ -80,15 +27,45 @@ def resolve_model_name(model_name='latest', alt_model_path=None):
     :return:
     """
 
-    models = get_all_models(alt_model_path)
+    models = {
+        'latest': '042801_base',
+        '042801_base': '042801_base'
+    }
 
-    # match model name
-    for model in models:
-        if model.name == model_name:
-            return model_name
+    assert model_name in models, f"{model_name} is not available"
 
-    # get the latest model in local
-    if model_name == 'latest':
-        return models[0].name
+    return models[model_name]
 
-    return "none"
+
+def pad_list(tensor_lst):
+    max_length = max(t.size(0) for t in tensor_lst)
+    batch_size = len(tensor_lst)
+
+    padded_tensor = tensor_lst[0].new(batch_size, max_length, *tensor_lst[0].size()[1:]).fill_(0)
+    for i, t in enumerate(tensor_lst):
+        padded_tensor[i,:t.size(0)] = t
+
+    return padded_tensor
+
+
+def pad_sos_eos(ys, sos, eos):
+
+    batch_size = len(ys)
+
+    sos_tensor = ys.new_zeros((batch_size, 1)).fill_(sos)
+    y_in = torch.cat([sos_tensor, ys], dim=1)
+
+    y_out = []
+
+    zero_tensor = ys.new_zeros((batch_size, 1))
+    extended_ys = torch.cat([ys, zero_tensor], dim=1)
+
+    for y in extended_ys:
+        #eos_idx = (y==0).nonzero()[0].item()
+        #print(y)
+        eos_idx = torch.nonzero(y==0)[0].item()
+        y[eos_idx] = eos
+        y_out.append(y)
+
+    y_out = pad_list(y_out)
+    return y_in, y_out

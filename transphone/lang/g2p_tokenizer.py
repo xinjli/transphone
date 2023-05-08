@@ -1,4 +1,4 @@
-from phonepiece.iso import normalize_lang_id
+from phonepiece.lang import normalize_lang_id
 from phonepiece.lexicon import read_lexicon
 from transphone.lang.base_tokenizer import BaseTokenizer
 
@@ -9,6 +9,7 @@ class G2PTokenizer(BaseTokenizer):
         super().__init__(lang_id, g2p_model, device)
 
         self.lexicon = read_lexicon(lang_id)
+
 
     def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 

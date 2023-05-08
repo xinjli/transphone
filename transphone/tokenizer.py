@@ -1,4 +1,4 @@
-from phonepiece.iso import normalize_lang_id
+from phonepiece.lang import normalize_lang_id
 from phonepiece.lexicon import read_lexicon
 from transphone.lang.base_tokenizer import BaseTokenizer
 from transphone.lang.eng.tokenizer import ENGTokenizer
@@ -114,7 +114,7 @@ raw_epitran_dict = {
 }
 
 
-def read_tokenizer(lang_id, g2p_model='latest', device=None, use_lexicon=True):
+def read_tokenizer(lang_id, g2p_model='latest', device=None, use_lexicon=True, use_epitran=True):
 
     lang_id = normalize_lang_id(lang_id)
 
@@ -124,9 +124,9 @@ def read_tokenizer(lang_id, g2p_model='latest', device=None, use_lexicon=True):
         tokenizer = CMNTokenizer(lang_id, g2p_model, device)
     elif lang_id == 'jpn':
         tokenizer = JPNTokenizer(lang_id, g2p_model, device)
-    elif lang_id in customized_epitran_dict:
+    elif lang_id in customized_epitran_dict and use_epitran:
         tokenizer = read_customized_epitran_tokenizer(customized_epitran_dict[lang_id], use_lexicon=use_lexicon)
-    elif lang_id in raw_epitran_dict:
+    elif lang_id in raw_epitran_dict and use_epitran:
         tokenizer = read_raw_epitran_tokenizer(raw_epitran_dict[lang_id], use_lexicon=use_lexicon)
     else:
         tokenizer = G2PTokenizer(lang_id, g2p_model, device)

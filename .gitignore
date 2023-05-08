@@ -135,3 +135,10 @@ transphone/pretrained
 .idea
 scripts/
 notes/
+transphone/research
+transphone/data/decode
+transphone/data/model
+transphone/data/sandbox
+transphone/data/exp/private
+transphone/data/jobs
+.DS_Store

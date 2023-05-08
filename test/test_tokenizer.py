@@ -16,6 +16,7 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(jpn.tokenize_words('こんにちは世界'), ['こんにちは', '世界'])
         self.assertEqual(jpn.tokenize('こんにちは世界'), ['k', 'o', 'N', 'n', 'i', 'ch', 'i', 'w', 'a', 's', 'e', 'k', 'a', 'i'])
         self.assertEqual(jpn.tokenize('2023年'), ['n', 'i', 's', 'e', 'N', 'n', 'i', 'j', 'u', 'u', 's', 'a', 'N', 'n', 'e', 'N'])
+        self.assertEqual(jpn.tokenize('ＵTＦとABC。'),  ['y', 'uː', 't', 'iː', 'e', 'f', 'u', 't', 'o', 'eː', 'b', 'iː', 'sh', 'iː'])
 
     def test_spa_tokenizer(self):
 

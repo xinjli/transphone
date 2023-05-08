@@ -1,4 +1,4 @@
-from transphone.data.utils import pad_list
+from transphone.model.utils import pad_list
 import torch
 from torch.utils.data import DataLoader
 

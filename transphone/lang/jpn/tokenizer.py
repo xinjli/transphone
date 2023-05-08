@@ -4,7 +4,7 @@ from transphone.g2p import read_g2p
 from phonepiece.inventory import read_inventory
 from transphone.lang.jpn import jaconv
 from transphone.lang.base_tokenizer import BaseTokenizer
-from transphone.lang.jpn.normalizer import normalize_neologd, parse_jpn_number
+from transphone.lang.jpn.normalizer import normalize_neologd, parse_jpn_number, parse_jpn_alphabet
 
 class JPNTokenizer(BaseTokenizer):
 
@@ -33,7 +33,6 @@ class JPNTokenizer(BaseTokenizer):
 
         return result
 
-
     def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
         text = normalize_neologd(text)
@@ -51,6 +50,10 @@ class JPNTokenizer(BaseTokenizer):
             if str.isdigit(raw):
                 hankaku_num = jaconv.z2h(kana)
                 kana = jaconv.hira2kata(parse_jpn_number(hankaku_num))
+
+            # interestingly, isalpha also return true for kana
+            if str.isalpha(raw) and str.isascii(raw):
+                kana = parse_jpn_alphabet(raw)
 
             res = self.kana2phoneme.convert(kana)
 

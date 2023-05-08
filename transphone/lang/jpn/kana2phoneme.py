@@ -1,4 +1,6 @@
 from .conv_table import FULL_KANA
+from phonepiece.inventory import read_inventory
+from transphone.config import TransphoneConfig
 
 _kana2phonemes = {
     'ア': 'a',
@@ -148,6 +150,9 @@ import re
 
 class Kana2Phoneme:
     def __init__(self):
+
+        self.phoneme_set = set(read_inventory('jpn').phoneme.elems)
+
         self._dict1 = {
             'キャ': 'ky a ',
             'キュ': 'ky u ',
@@ -292,6 +297,34 @@ class Kana2Phoneme:
             'ン': 'N ',
             'ッ': 'q ',
             'ー': 'ː ',
+            'ァ': 'a ',
+            'ィ': 'i ',
+            'ゥ': 'u ',
+            'ェ': 'e ',
+            'ォ': 'o ',
+            'ャ': 'y a ',
+            'ュ': 'y u ',
+            'ョ': 'y o ',
+            'ヮ': 'w a ',
+            'ヵ': 'k a ',
+            'ヶ': 'k e ',
+            'ヰ': 'i ',
+            'ヱ': 'e ',
+            'ヴ': 'b u ',
+            'ヽ': '',  # this should not reach here though
+            'ヾ': '',  # this should not reach here though
+            'ヷ': 'w a ',
+            'ヸ': 'i ',
+            'ヹ': 'e ',
+            'ヺ': 'o ',
+            'ヿ': '',  # this should not reach here though
+            '゛': '',  # this should not reach here though
+            '゜': '',  # this should not reach here though
+            'ヽ': '',  # this should not reach here though
+            'ヾ': '',  # this should not reach here though
+            'ゝ': '',  # this should not reach here though
+            'ゞ': '',  # this should not reach here though
+            '〆': '',  # this should not reach here though
             '々': '',  # this should not reach here though
         }
         self._regex1 = re.compile(u"(%s)" % u"|".join(map(re.escape, self._dict1.keys())))
@@ -319,10 +352,13 @@ class Kana2Phoneme:
         phonemes = []
         for temp_phoneme in temp_phonemes:
             if temp_phoneme == 'ː':
-                if len(phonemes) > 0:
+                if len(phonemes) > 0 and phonemes[-1] in ['a', 'i', 'u', 'e', 'o']:
                     phonemes[-1] = phonemes[-1]+'ː'
                 continue
 
-            phonemes.append(temp_phoneme)
+            if temp_phoneme in self.phoneme_set:
+                phonemes.append(temp_phoneme)
+            else:
+                TransphoneConfig.logger.error("Unknown phoneme: %s" % temp_phoneme)
 
         return phonemes

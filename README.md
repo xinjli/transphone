@@ -37,7 +37,7 @@ The tokenizer converts a string into each languages' phonemes
 
 It will use the following strategy to decide pronunciation
 
-- it will first lookup lexicon dictionary for pronunciation (from Wikitionary)
+- it will first lookup lexicon dictionary for pronunciation (from Wikitionary, cmudict, and other sources)
 - try identifying rule-based transducer from [Epitran](https://github.com/dmort27/epitran) if supported.
 - fall back to the G2P engine if both previous options are not available.  
 
@@ -132,11 +132,15 @@ kik   ['t', 'l', 'a', 'n', 's', 'f', 'ɔ', 'n', 'ɛ']
 Out[5]: ['t', 'l', 'a', 'n', 's', 'f', 'o', 'n', 'e']
 ```
 
-## Models
+## G2P Models
 
-| model | # supported languages |       description        |
-| :----: |:---------------------:|:------------------------:|
-| latest |          ~8k          | based on our work at [1] |
+You can see the G2P evaluation over 1k languages on the [performance doc](./doc/README.md)
+
+Note this is the pure G2P evaluation on unseen words. The tokenizer combines other existing resources (i.e. lexicon) as well, so the tokenizer's performance is expected to be much better than this. 
+
+|        model         | # supported languages | supervised language PER | zero-shot language PER |       description        |
+|:--------------------:|:---------------------:|:-----------------------:|:----------------------:|:------------------------:|
+| 042801_base (latest) |          ~8k          |           13%           |          31%           | based on our work at [1] |
 
 ## Reference
 

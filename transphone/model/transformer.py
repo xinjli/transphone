@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torch.nn import Transformer
 import math
-from transphone.data.utils import pad_sos_eos
+from transphone.model.utils import pad_sos_eos
 from transphone.config import TransphoneConfig
 
 UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 0, 1, 1
@@ -68,7 +68,7 @@ class TransformerG2P(nn.Module):
                  tgt_vocab_size: int,
                  dim_feedforward: int = 512,
                  dropout: float = 0.1):
-        super(TransformerG2P, self).__init__()
+        super().__init__()
         self.transformer = Transformer(d_model=emb_size,
                                        nhead=nhead,
                                        num_encoder_layers=num_encoder_layers,
@@ -108,7 +108,6 @@ class TransformerG2P(nn.Module):
     def train_step(self, x,y):
 
         self.train()
-        batch_size = x.shape[0]
 
         ys_in, ys_out = pad_sos_eos(y, 1, 1)
 

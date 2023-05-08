@@ -8,6 +8,8 @@ def import_with_auto_install(package, package_name):
         pip.main(['install', package_name])
     return importlib.import_module(package)
 
+
+
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):

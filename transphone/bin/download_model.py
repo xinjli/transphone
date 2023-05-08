@@ -4,6 +4,8 @@ from urllib.request import urlopen
 import io
 import argparse
 import os
+from transphone.config import TransphoneConfig
+from transphone.model.utils import resolve_model_name
 
 
 def download_model(model_name=None, alt_model_path=None):
@@ -13,8 +15,10 @@ def download_model(model_name=None, alt_model_path=None):
     if alt_model_path:
         model_dir = alt_model_path
     else:
-        model_dir = (Path(__file__).parent.parent) / 'pretrained' / 'model'
+        model_dir = TransphoneConfig.data_path / 'model'
         model_dir.mkdir(parents=True, exist_ok=True)
+
+    model_name = resolve_model_name(model_name)
 
     if not (model_dir / model_name).exists():
 

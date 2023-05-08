@@ -1,50 +1,68 @@
-from phonepiece.iso import normalize_lang_id
+from phonepiece.lang import normalize_lang_id
 from transphone.model.checkpoint_utils import torch_load
 from transphone.model.transformer import TransformerG2P
 from transphone.model.ensemble import ensemble
 from transphone.bin.download_model import download_model
 from transphone.config import TransphoneConfig
-from transphone.data.vocab import Vocab
+from transphone.model.checkpoint_utils import find_topk_models
+from transphone.model.vocab import Vocab
+from transphone.model.utils import read_model_config
 from transphone.utils import Singleton
-from phonepiece.tree import read_tree
+from phonepiece.lang import read_tree
 from phonepiece.inventory import read_inventory
+from pathlib import Path
 import torch
 import unidecode
 from itertools import groupby
+from transphone.model.utils import resolve_model_name
 
 
-def read_g2p(model_name='latest', device=None, alt_model_path=None):
+def read_g2p(model_name='latest', device=None, checkpoint=None):
 
     if device is not None:
         assert device in ['cpu', 'cuda']
         TransphoneConfig.device = device
 
-    if alt_model_path:
-        # check whether a customized path is used or not
-        model_path = alt_model_path
-    else:
+    model_name = resolve_model_name(model_name)
+    cache_path = None
+
+    if checkpoint is None:
         model_path = TransphoneConfig.data_path / 'model' / model_name
 
-    # if not exists, we try to download the model
-    if not model_path.exists():
-        download_model(model_name)
+        # if not exists, we try to download the model
+        if not model_path.exists():
+            download_model(model_name)
 
-    if not model_path.exists():
-        raise ValueError(f"could not download or read {model_name} inventory")
+        if not model_path.exists():
+            raise ValueError(f"could not download or read {model_name} model")
 
-    model = G2P(model_path, {})
+        if (model_path / "model.pt").exists():
+            checkpoint = model_path / "model.pt"
+        else:
+            checkpoint = find_topk_models(model_path)[0]
+
+        if (model_path / 'cache').exists():
+            cache_path = model_path / 'cache'
+        else:
+            cache_path = None
+
+    config = read_model_config(model_name)
+
+    model = G2P(checkpoint, cache_path, config)
 
     return model
 
 
 class G2P(metaclass=Singleton):
 
-    def __init__(self, model_path, inference_config):
+    def __init__(self, checkpoint, cache_path, config):
 
-        self.model_path = model_path
-        self.grapheme_vocab = Vocab.read(model_path / 'grapheme.vocab')
-        self.phoneme_vocab = Vocab.read(model_path / 'phoneme.vocab')
-        self.inference_config = inference_config
+        self.model_path = Path(checkpoint).parent
+        self.grapheme_vocab = Vocab.read(self.model_path / 'grapheme.vocab')
+        self.phoneme_vocab = Vocab.read(self.model_path / 'phoneme.vocab')
+        self.config = config
+        self.checkpoint = checkpoint
+        self.cache_path = cache_path
 
         # setup available languages
         self.supervised_langs = []
@@ -52,35 +70,35 @@ class G2P(metaclass=Singleton):
             if len(word) == 5 and word[0] == '<' and word[-1] == '>':
                 self.supervised_langs.append(word[1:-1])
 
-
         # cache to find proper supervised language
         self.lang_map = {}
 
         # inventory
         self.lang2inv = {}
 
+        # lang2cache
+        self.lang2cache = {}
+
         # tree to estimate language's similarity
         self.tree = read_tree()
         self.tree.setup_target_langs(self.supervised_langs)
         self.supervised_langs = set(self.supervised_langs)
 
-
         SRC_VOCAB_SIZE = len(self.grapheme_vocab)+1
         TGT_VOCAB_SIZE = len(self.phoneme_vocab)+1
 
-        EMB_SIZE = 512
-        NHEAD = 8
-        FFN_HID_DIM = 512
-        NUM_ENCODER_LAYERS = 4
-        NUM_DECODER_LAYERS = 4
-        torch.manual_seed(0)
+        EMB_SIZE = config.embed_size
+        NHEAD = config.num_head
+        FFN_HID_DIM = config.hidden_size
+        NUM_ENCODER_LAYERS = config.num_encoder
+        NUM_DECODER_LAYERS = config.num_decoder
 
+        torch.manual_seed(0)
 
         self.model = TransformerG2P(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS, EMB_SIZE,
                             NHEAD, SRC_VOCAB_SIZE, TGT_VOCAB_SIZE, FFN_HID_DIM).to(TransphoneConfig.device)
 
-
-        torch_load(self.model, model_path / "model.pt")
+        torch_load(self.model, self.checkpoint)
 
 
     def get_target_langs(self, lang_id, num_lang=10, verbose=False, force_approximate=False):

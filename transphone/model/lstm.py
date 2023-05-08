@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from transphone.data.utils import pad_sos_eos
+from transphone.model.utils import pad_sos_eos
 import torch.nn.functional as F
 import math
 import numpy as np
