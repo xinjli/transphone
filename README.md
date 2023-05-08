@@ -134,7 +134,7 @@ Out[5]: ['t', 'l', 'a', 'n', 's', 'f', 'o', 'n', 'e']
 
 ## G2P Models
 
-You can see the G2P evaluation over 1k languages on the [performance doc](./doc/README.md)
+You can see the G2P evaluation over 1k languages on the [performance doc](./doc/performance/README.md)
 
 Note this is the pure G2P evaluation on unseen words. The tokenizer combines other existing resources (i.e. lexicon) as well, so the tokenizer's performance is expected to be much better than this. 
 
