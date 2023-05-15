@@ -125,7 +125,7 @@ raw_epitran_dict = {
 def read_epitran_tokenizer(lang_id, g2p_model=None, device=None, use_lexicon=True):
     if lang_id in customized_epitran_dict:
         return read_customized_epitran_tokenizer(customized_epitran_dict[lang_id], use_lexicon)
-    elif lang_id_or_epi_id in raw_epitran_dict:
+    elif lang_id in raw_epitran_dict:
         return read_raw_epitran_tokenizer(raw_epitran_dict[lang_id], use_lexicon)
     else:
         raise ValueError('Unknown epitran id: {}'.format(lang_id_or_epi_id))
