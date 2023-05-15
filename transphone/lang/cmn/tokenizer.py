@@ -3,6 +3,11 @@ from transphone.lang.base_tokenizer import BaseTokenizer
 from phonepiece.pinyin import PinyinConverter
 from transphone.lang.cmn.normalizer import CMNNormalizer
 
+
+def read_cmn_tokenizer(lang_id='cmn', g2p_model='latest', device=None, use_lexicon=True):
+    return CMNTokenizer(lang_id, g2p_model, device)
+
+
 class CMNTokenizer(BaseTokenizer):
 
     def __init__(self, lang_id='cmn', g2p_model='latest', device=None):

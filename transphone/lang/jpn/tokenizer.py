@@ -6,6 +6,10 @@ from transphone.lang.jpn import jaconv
 from transphone.lang.base_tokenizer import BaseTokenizer
 from transphone.lang.jpn.normalizer import normalize_neologd, parse_jpn_number, parse_jpn_alphabet
 
+
+def read_jpn_tokenizer(lang_id, g2p_model='latest', device=None, use_lexicon=True):
+    return JPNTokenizer(lang_id, g2p_model, device)
+
 class JPNTokenizer(BaseTokenizer):
 
     def __init__(self, lang_id, g2p_model='latest', device=None):

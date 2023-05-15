@@ -192,6 +192,8 @@ class G2P(metaclass=Singleton):
             graphemes = [lang_tag]+[w.lower() for w in list(word)]
 
             grapheme_ids = []
+            normalized_graphemes = []
+
             for grapheme in graphemes:
                 if grapheme not in self.grapheme_vocab:
 
@@ -206,10 +208,16 @@ class G2P(metaclass=Singleton):
                         # discard special chars such as $
                         if roman in self.grapheme_vocab:
                             grapheme_ids.append(self.grapheme_vocab.atoi(roman))
+                            normalized_graphemes.append(roman)
                     continue
+
+                normalized_graphemes.append(grapheme)
                 grapheme_ids.append(self.grapheme_vocab.atoi(grapheme))
 
             grapheme_input.append(grapheme_ids)
+
+            if verbose:
+                print(f"normalized: {word} -> {normalized_graphemes}")
 
         x = torch.LongTensor(grapheme_input).to(TransphoneConfig.device)
 

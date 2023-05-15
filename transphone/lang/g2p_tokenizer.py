@@ -3,6 +3,10 @@ from phonepiece.lexicon import read_lexicon
 from transphone.lang.base_tokenizer import BaseTokenizer
 
 
+def read_g2p_tokenizer(lang_id, g2p_model='latest', device=None):
+    lang_id = normalize_lang_id(lang_id)
+    return G2PTokenizer(lang_id, g2p_model, device)
+
 class G2PTokenizer(BaseTokenizer):
 
     def __init__(self, lang_id, g2p_model='latest', device=None):
@@ -36,7 +40,7 @@ class G2PTokenizer(BaseTokenizer):
                 if verbose:
                     print(log)
             else:
-                phonemes = self.g2p.inference_batch(word, self.lang_id)
+                phonemes = self.g2p.inference_batch(word, self.lang_id, verbose=verbose)
                 remapped_phonemes = self.inventory.remap(phonemes)
 
                 log = f"g2p batch mode: {word} ->  {remapped_phonemes}"

@@ -3,6 +3,10 @@ from transphone.lang.base_tokenizer import BaseTokenizer
 from phonepiece.arpa import ArpaConverter
 from transphone.lang.eng.normalizer import ENGNormalizer
 
+def read_eng_tokenizer(lang_id='eng', g2p_model='latest', device=None, use_lexicon=True):
+    return ENGTokenizer(lang_id, g2p_model, device)
+
+
 class ENGTokenizer(BaseTokenizer):
 
     def __init__(self, lang_id='eng', g2p_model='latest', device=None):

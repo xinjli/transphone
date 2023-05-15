@@ -2,18 +2,9 @@
 
 ![CI Test](https://github.com/xinjli/transphone/actions/workflows/python.yml/badge.svg)
 
-`transphone` is a grapheme-to-phoneme conversion toolkit. It provides phoneme tokenizers as well as approximation G2P model for 8000 languages.
+`transphone` is a multilingual grapheme-to-phoneme conversion toolkit derived from our paper: [Zero-shot Learning for Grapheme to Phoneme Conversion with Language Ensemble](https://aclanthology.org/2022.findings-acl.166/).
 
-This repo contains our code and pretrained models roughly following our paper accepted at `Findings of ACL 2022`
-
-`Zero-shot Learning for Grapheme to Phoneme Conversion with Language Ensemble`
-
-It is a multilingual G2P (grapheme-to-phoneme) model that can be applied to all 8k languages registered in the [Glottolog database](https://glottolog.org/glottolog/language). You can read our papers at [Open Review](https://openreview.net/pdf?id=dKTTArRu8G2)
-
-Our approach:
-- We first trained our supervised multilingual model with ~900 languages using lexicons from [Wikitionary](https://en.wiktionary.org/wiki/Wiktionary:Main_Page)
-- if the target language (any language from the 8k languages) does not have any training set, we approximate its g2p model by using similar lanuguages from the supervised language sets and ensemble their inference results to obtain the target g2p.
-
+It provides approximiated phoneme tokenizers and G2P model for 7546 languages registered in the [Glottolog database](https://glottolog.org/glottolog/language).  You can see the full list of supported languages in [the language doc](./doc/language.md) 
 
 ## Install
 
@@ -29,25 +20,25 @@ You can clone this repository and install
 python setup.py install
 ```
 
-## Usage
+## Tokenizer Usage
 
-### Tokenizer interface
+The tokenizer converts a string into each languages' phonemes. By default, it combines a few approach to decide the pronunciation of a word for the target language:
 
-The tokenizer converts a string into each languages' phonemes
+- **lexicon-based**: it will first lookup lexicon dictionary for pronunciation (from Wikitionary, cmudict, and other sources), currently around 1k languages have at least some entries.
+- **transducer-based**: it will use rule-based transducer from [epitran](https://github.com/dmort27/epitran) for several languages considering accuracy and speed. 
+- **g2p-based**: use the G2P model as described in the next section.
 
-It will use the following strategy to decide pronunciation
+### python interface
 
-- it will first lookup lexicon dictionary for pronunciation (from Wikitionary, cmudict, and other sources)
-- try identifying rule-based transducer from [Epitran](https://github.com/dmort27/epitran) if supported.
-- fall back to the G2P engine if both previous options are not available.  
-
-Currently, more than 200 languages have lexicon available inside, about 100 languages have epitran supported. Other languages will use G2P instead.
+You can use it from python as follows:
 
 ```python
 In [1]: from transphone import read_tokenizer                                                                                                  
 
+# use 2-char or 3-char ISO id to specify your target language 
 In [2]: eng = read_tokenizer('eng')                                                                                                            
 
+# tokenize a string of text into a list of phonemes
 In [3]: lst = eng.tokenize('hello world')                                                                                                      
 
 In [4]: lst                                                                                                                                    
@@ -78,9 +69,9 @@ Out[13]: ['h', 'a', 'l', 'o', 'v', 'e', 'l', 't']
 
 ```
 
-### G2P Command line
+### command line interface
 
-A command line tool is available
+A command line tool is also available
 
 ```bash
 # compute pronunciation for every word in input file
@@ -96,7 +87,11 @@ world w ə l d
 transphone t ɹ æ n s f ə ʊ n
 ```
 
-### python G2P interface
+## G2P Backend Usage
+
+The tokenizer in the previous section uses the G2P as one of the backend option. You can also use the G2P model directly.
+
+### python interface
 
 A simple python usage is as follows:
 
@@ -132,7 +127,9 @@ kik   ['t', 'l', 'a', 'n', 's', 'f', 'ɔ', 'n', 'ɛ']
 Out[5]: ['t', 'l', 'a', 'n', 's', 'f', 'o', 'n', 'e']
 ```
 
-## G2P Models
+### Pretrained Models
+
+This pretrained models roughly following our paper accepted at `Findings of ACL 2022`: [Zero-shot Learning for Grapheme to Phoneme Conversion with Language Ensemble](https://aclanthology.org/2022.findings-acl.166/). 
 
 You can see the G2P evaluation over 1k languages on the [performance doc](./doc/performance/README.md)
 
@@ -141,6 +138,23 @@ Note this is the pure G2P evaluation on unseen words. The tokenizer combines oth
 |        model         | # supported languages | supervised language PER | zero-shot language PER |       description        |
 |:--------------------:|:---------------------:|:-----------------------:|:----------------------:|:------------------------:|
 | 042801_base (latest) |          ~8k          |           13%           |          31%           | based on our work at [1] |
+
+### Training
+
+We also provide the training code for G2P. You can reproduce the pretrained model using `transphone.bin.train_g2p` 
+
+## Epitran backend
+
+This repo also provides a wrapper of a customized version of [epitran](https://github.com/dmort27/epitran). For a few languages, it will use epitran as the backend considering accuracy and speed.
+
+You can also use epitran directly as follows:
+
+```python
+In [1]: tokenizer = read_epitran_tokenizer('spa', use_lexicon=False)
+
+In [2]: tokenizer.tokenize('hola')
+Out[2]: ['o', 'l', 'a']
+```
 
 ## Reference
 
