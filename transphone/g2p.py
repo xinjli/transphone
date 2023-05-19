@@ -41,10 +41,10 @@ def read_g2p(model_name='latest', device=None, checkpoint=None):
         else:
             checkpoint = find_topk_models(model_path)[0]
 
-        if (model_path / 'cache').exists():
-            cache_path = model_path / 'cache'
-        else:
-            cache_path = None
+        cache_path = model_path / 'cache'
+
+        if not (model_path / 'cache').exists():
+            cache_path.mkdir(parents=True, exist_ok=True)
 
     config = read_model_config(model_name)
 

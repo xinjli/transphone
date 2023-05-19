@@ -13,7 +13,11 @@ class BaseTokenizer:
         else:
             self.g2p = read_g2p(g2p_model, device)
 
+        # cache for g2p
         self.cache = {}
+
+        # this will temporarily store new caches, which will be flashed to disk
+        self.cache_log = {}
 
         if self.g2p is not None and self.g2p.cache_path is not None:
             lang_cache_path = self.g2p.cache_path / f"{lang_id}.txt"
@@ -24,6 +28,24 @@ class BaseTokenizer:
 
         self.punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
         self.logger = TransphoneConfig.logger
+
+    def add_cache(self, word, phonemes):
+
+        self.cache[word] = phonemes
+
+        if self.g2p is None or self.g2p.cache_path is None:
+            return
+
+        # handle new cache
+        self.cache_log[word] = phonemes
+
+        # flash them to disk if the cache is large enough
+        if len(self.cache_log) >= 100 and self.g2p.cache_path is not None and self.g2p.cache_path.exists():
+            w = open(self.g2p.cache_path / f"{self.lang_id}.txt", 'a')
+            for word, phonemes in self.cache_log.items():
+                w.write(f"{word}\t{' '.join(phonemes)}\n")
+            w.close()
+            self.cache_log = {}
 
     def tokenize(self, text: str):
         raise NotImplementedError
