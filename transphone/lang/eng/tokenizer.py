@@ -50,14 +50,15 @@ class ENGTokenizer(BaseTokenizer):
                     self.cache[word] = ipas
 
                 elif use_g2p:
-                    phonemes = self.g2p.inference(word)
+                    phonemes = self.g2p.inference_batch(word, self.lang_id, verbose=verbose)
                     remapped_phonemes = self.inventory.remap(phonemes)
 
                     log = f"g2p {word} ->  {remapped_phonemes}"
                     self.logger.info(log)
                     if verbose:
                         print(log)
-                    self.cache[word] = remapped_phonemes
+
+                    self.add_cache(word, remapped_phonemes)
                     ipa_lst.extend(remapped_phonemes)
                 if use_space:
                     ipa_lst.append('<SPACE>')
