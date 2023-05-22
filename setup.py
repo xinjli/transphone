@@ -4,11 +4,12 @@ requirements=[r.strip() for r in open("requirements.txt").readlines()]
 
 setup(
    name='transphone',
-   version='1.5.0',
+   version='1.5.1',
    description='a multilingual g2p/p2g model',
    author='Xinjian Li',
    author_email='xinjianl@cs.cmu.edu',
    url="https://github.com/xinjli/transphone",
    packages=find_packages(),
+   package_data={'': ['*.csv', '*.tsv', '*.yml']},
    install_requires=requirements,
 )
