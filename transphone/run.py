@@ -16,6 +16,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input', type=str, required=True, help='specify your input wav file/directory')
     parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='specify output file. the default will be stdout')
+    parser.add_argument('-d', '--device', help='specify device to use, if not specified, it will try using gpu when applicable')
     parser.add_argument('-f', '--format', type=str, default='text', help='kaldi or text')
     parser.add_argument('-c', '--combine', type=bool, default=False,
                         help='write outputs by including both grapheme inputs and phonemes in the same line, delimited by space')
@@ -34,8 +35,12 @@ if __name__ == '__main__':
     # download specified model automatically if no model exists
     download_model(model_name)
 
+    device = None
+    if args.device is not None and isinstance(args.device, str) and str.isdigit(args.device):
+        device = int(args.device)
+
     # create model
-    tokenizer = read_tokenizer(args.lang, g2p_model=model_name)
+    tokenizer = read_tokenizer(args.lang, g2p_model=model_name, device=device)
 
     # output file descriptor
     output_fd = None
