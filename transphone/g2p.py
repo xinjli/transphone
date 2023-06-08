@@ -20,8 +20,18 @@ from transphone.model.utils import resolve_model_name
 def read_g2p(model_name='latest', device=None, checkpoint=None):
 
     if device is not None:
-        assert device in ['cpu', 'cuda']
-        TransphoneConfig.device = device
+        if isinstance(device, str):
+            assert device in ['cpu', 'cuda']
+            TransphoneConfig.device = device
+        elif isinstance(device, int):
+            if device == -1:
+                TransphoneConfig.device = 'cpu'
+            else:
+                TransphoneConfig.device = f'cuda:{device}'
+
+        else:
+            assert isinstance(device, torch.device)
+            TransphoneConfig.device = device.type
 
     model_name = resolve_model_name(model_name)
     cache_path = None
