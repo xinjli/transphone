@@ -26,7 +26,7 @@ class BaseTokenizer:
                     fields = line.strip().split()
                     self.cache[fields[0]] = fields[1:]
 
-        self.punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+        self.punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~0123456789'
         self.logger = TransphoneConfig.logger
 
     def add_cache(self, word, phonemes):
@@ -52,6 +52,9 @@ class BaseTokenizer:
 
     def tokenize_words(self, text:str):
         text = text.translate(str.maketrans('', '', self.punctuation)).lower()
+
+        words = text.split()
+        cleaned_words = [word for word in words if len(word) > 0]
 
         return text.split()
 

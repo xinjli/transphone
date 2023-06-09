@@ -19,6 +19,11 @@ class ENGTokenizer(BaseTokenizer):
         self.converter = ArpaConverter()
         self.normalizer = ENGNormalizer()
 
+    def tokenize_words(self, text:str):
+        text = self.normalizer(text)
+        words = text.split()
+        return words
+
     def tokenize(self, text, use_g2p=True, use_space=False, verbose=False):
 
         norm_text = self.normalizer(text)

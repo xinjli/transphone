@@ -98,7 +98,7 @@ class ENGNormalizer:
         for token in tokens:
             if str.isdigit(token):
                 # 1 Filter out anything that isn't a digit
-                token = self.filter_regex.sub("", text)
+                token = self.filter_regex.sub("", token)
                 # 2 Check for special case
                 if token == "007":
                     return "double o seven"
